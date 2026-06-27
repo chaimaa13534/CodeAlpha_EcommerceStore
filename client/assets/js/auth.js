@@ -1,7 +1,3 @@
-/* ═══════════════════════════════════════════
-   ShopLux – Auth State Manager (auth.js)
-   ═══════════════════════════════════════════ */
-
 const Auth = {
   _user: null,
   _token: null,
@@ -13,13 +9,19 @@ const Auth = {
       this._user = raw ? JSON.parse(raw) : null;
     } catch { this._user = null; }
     this._updateUI();
-    window.addEventListener('auth:logout', () => this.logout(false));
+
+    // Only listen to forced logout on non-auth pages
+    const isAuthPage = window.location.pathname.includes('/login') ||
+                       window.location.pathname.includes('/register');
+    if (!isAuthPage) {
+      window.addEventListener('auth:logout', () => this.logout(false));
+    }
   },
 
-  get user()  { return this._user; },
-  get token() { return this._token; },
-  get isLoggedIn() { return !!this._token && !!this._user; },
-  get isAdmin()    { return this._user?.role === 'admin'; },
+  get user()      { return this._user; },
+  get token()     { return this._token; },
+  get isLoggedIn(){ return !!this._token && !!this._user; },
+  get isAdmin()   { return this._user?.role === 'admin'; },
 
   setSession(token, user) {
     this._token = token;
@@ -27,6 +29,7 @@ const Auth = {
     localStorage.setItem('sl_token', token);
     localStorage.setItem('sl_user', JSON.stringify(user));
     this._updateUI();
+    // Cart may not be loaded on auth-only pages (login, register)
     if (typeof Cart !== 'undefined') Cart.refresh();
   },
 
@@ -37,14 +40,14 @@ const Auth = {
     localStorage.removeItem('sl_user');
     this._updateUI();
     if (redirect) {
-      Toast.show('Logged out successfully.', 'info');
+      if (typeof Toast !== 'undefined') Toast.show('Logged out successfully.', 'info');
       setTimeout(() => window.location.href = '/', 600);
     }
   },
 
   requireAuth(redirectTo) {
     if (!this.isLoggedIn) {
-      const back = redirectTo || window.location.pathname;
+      const back = redirectTo || window.location.pathname + window.location.search;
       window.location.href = `/pages/login.html?redirect=${encodeURIComponent(back)}`;
       return false;
     }
@@ -64,7 +67,8 @@ const Auth = {
       userLinks.classList.remove('hidden');
       if (adminLink) adminLink.classList.toggle('hidden', !this.isAdmin);
       if (header) {
-        header.querySelector('.dropdown-name').textContent = `${this._user.firstname} ${this._user.lastname}`;
+        header.querySelector('.dropdown-name').textContent =
+          `${this._user.firstname} ${this._user.lastname}`;
         header.querySelector('.dropdown-email').textContent = this._user.email;
       }
     } else {
@@ -72,7 +76,7 @@ const Auth = {
       userLinks.classList.add('hidden');
       if (adminLink) adminLink.classList.add('hidden');
       if (header) {
-        header.querySelector('.dropdown-name').textContent = 'Welcome!';
+        header.querySelector('.dropdown-name').textContent  = 'Welcome!';
         header.querySelector('.dropdown-email').textContent = 'Sign in to continue';
       }
     }
