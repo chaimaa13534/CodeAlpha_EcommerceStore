@@ -1,0 +1,112 @@
+/* ═══════════════════════════════════════════
+   ShopLux – CSS Custom Properties / Design Tokens
+   ═══════════════════════════════════════════ */
+
+:root {
+  /* ── Brand Colors ── */
+  --color-primary:       #6C63FF;
+  --color-primary-dark:  #5A52D5;
+  --color-primary-light: #8B85FF;
+  --color-accent:        #FF6584;
+  --color-accent-dark:   #E55070;
+  --color-success:       #10B981;
+  --color-warning:       #F59E0B;
+  --color-danger:        #EF4444;
+  --color-info:          #3B82F6;
+
+  /* ── Neutrals (Light Mode) ── */
+  --bg-primary:    #FFFFFF;
+  --bg-secondary:  #F8F9FC;
+  --bg-tertiary:   #EEF0F7;
+  --bg-card:       #FFFFFF;
+  --bg-dark:       #F1F3F9;
+
+  --text-primary:  #1A1B2E;
+  --text-secondary:#4A4B6A;
+  --text-muted:    #9B9BC0;
+  --text-inverse:  #FFFFFF;
+
+  --border-color:  #E2E5F1;
+  --border-light:  #F0F2FA;
+
+  /* ── Typography ── */
+  --font-sans:    'Inter', system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+  --text-5xl:  3rem;
+  --text-6xl:  3.75rem;
+
+  /* ── Spacing ── */
+  --spacing-1:  0.25rem;
+  --spacing-2:  0.5rem;
+  --spacing-3:  0.75rem;
+  --spacing-4:  1rem;
+  --spacing-5:  1.25rem;
+  --spacing-6:  1.5rem;
+  --spacing-8:  2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+
+  /* ── Layout ── */
+  --container-max: 1280px;
+  --navbar-height: 72px;
+  --category-nav-height: 48px;
+
+  /* ── Radius ── */
+  --radius-sm:   0.375rem;
+  --radius-md:   0.625rem;
+  --radius-lg:   1rem;
+  --radius-xl:   1.5rem;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg:  0 10px 40px rgba(0,0,0,.12);
+  --shadow-xl:  0 20px 60px rgba(0,0,0,.16);
+  --shadow-glow: 0 0 0 3px rgba(108,99,255,.25);
+
+  /* ── Transitions ── */
+  --transition-fast:   150ms ease;
+  --transition-base:   250ms ease;
+  --transition-slow:   400ms ease;
+
+  /* ── Z-index ── */
+  --z-dropdown:  100;
+  --z-sticky:    200;
+  --z-overlay:   300;
+  --z-modal:     400;
+  --z-toast:     500;
+  --z-loader:    999;
+}
+
+/* ═══════ DARK MODE ═══════ */
+[data-theme="dark"] {
+  --bg-primary:    #0D0E1A;
+  --bg-secondary:  #13141F;
+  --bg-tertiary:   #1A1B2E;
+  --bg-card:       #1E1F30;
+  --bg-dark:       #111220;
+
+  --text-primary:  #E8E9FF;
+  --text-secondary:#A0A3C4;
+  --text-muted:    #5C5E80;
+
+  --border-color:  #2A2B45;
+  --border-light:  #1E1F30;
+
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.3);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.4);
+  --shadow-lg:  0 10px 40px rgba(0,0,0,.5);
+}

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders — ShopLux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/assets/css/variables.css" /><link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" /><link rel="stylesheet" href="/assets/css/layout.css" />
+  <link rel="stylesheet" href="/assets/css/pages.css" /><link rel="stylesheet" href="/assets/css/animations.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
+</head>
+<body>
+<div id="toastContainer" class="toast-container"></div>
+<header class="navbar"><div class="container navbar-inner">
+  <a href="/" class="navbar-logo"><span class="logo-text">Shop<span class="logo-accent">Lux</span></span></a>
+  <nav style="display:flex;align-items:center;gap:var(--spacing-4);margin-left:auto">
+    <a href="/pages/dashboard.html" class="btn btn-sm btn-outline"><i class="fas fa-arrow-left"></i> Dashboard</a>
+    <button class="action-btn theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+  </nav>
+</div></header>
+
+<main>
+  <div class="container" style="padding-top:var(--spacing-10);padding-bottom:var(--spacing-16)">
+    <!-- Success Banner -->
+    <div id="successBanner" style="display:none;background:rgba(16,185,129,.1);border:1px solid var(--color-success);border-radius:var(--radius-xl);padding:var(--spacing-6);margin-bottom:var(--spacing-8);display:flex;align-items:center;gap:var(--spacing-4)">
+      <div style="width:52px;height:52px;background:var(--color-success);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <i class="fas fa-check" style="color:#fff;font-size:1.3rem"></i>
+      </div>
+      <div>
+        <h3 style="color:var(--color-success);font-size:var(--text-lg)">Order Placed Successfully!</h3>
+        <p style="color:var(--text-secondary);font-size:var(--text-sm)">Order #<strong id="successOrderNum"></strong> has been confirmed. You'll receive updates on your order status.</p>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--spacing-8)">
+      <h1 style="font-family:var(--font-display);font-size:var(--text-3xl)">My Orders</h1>
+      <div style="display:flex;gap:var(--spacing-3)">
+        <select id="statusFilter" class="form-select" style="width:auto">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="ordersContainer">
+      <div style="text-align:center;padding:var(--spacing-10)"><div class="spinner spinner-lg"></div></div>
+    </div>
+
+    <div id="ordersPagination" class="pagination"></div>
+  </div>
+</main>
+
+<!-- Order Detail Modal -->
+<div class="modal-overlay" id="orderDetailOverlay">
+  <div class="modal modal-lg"><button class="modal-close" id="orderDetailClose"><i class="fas fa-times"></i></button>
+    <div class="modal-header"><h3 class="modal-title" id="orderDetailTitle">Order Details</h3></div>
+    <div class="modal-body" id="orderDetailBody"></div>
+  </div>
+</div>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/cart.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script>
+let currentPage = 1;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const theme = localStorage.getItem('sl_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeToggle')?.addEventListener('click', () => {
+    const c = document.documentElement.getAttribute('data-theme');
+    const n = c === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', n);
+    localStorage.setItem('sl_theme', n);
+    document.querySelector('#themeToggle i').className = n === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+  });
+
+  Auth.init();
+  if (!Auth.requireAuth('/pages/orders.html')) return;
+
+  // Success banner
+  const successNum = new URLSearchParams(window.location.search).get('success');
+  if (successNum) {
+    const banner = document.getElementById('successBanner');
+    document.getElementById('successOrderNum').textContent = successNum;
+    banner.style.display = 'flex';
+    history.replaceState({}, '', '/pages/orders.html');
+  }
+
+  document.getElementById('statusFilter')?.addEventListener('change', () => { currentPage = 1; loadOrders(); });
+  document.getElementById('orderDetailClose')?.addEventListener('click', () => document.getElementById('orderDetailOverlay').classList.remove('open'));
+  document.getElementById('orderDetailOverlay')?.addEventListener('click', e => { if (e.target.id === 'orderDetailOverlay') e.target.classList.remove('open'); });
+
+  await loadOrders();
+});
+
+async function loadOrders() {
+  const container = document.getElementById('ordersContainer');
+  const status    = document.getElementById('statusFilter')?.value;
+  container.innerHTML = `<div style="text-align:center;padding:var(--spacing-10)"><div class="spinner spinner-lg"></div></div>`;
+
+  try {
+    const params = { page: currentPage, limit: 10 };
+    if (status) params.status = status;
+    const res = await Api.orders.list(params);
+
+    if (!res.data.length) {
+      container.innerHTML = `<div class="empty-state"><i class="fas fa-box-open fa-4x"></i><h3>No orders found</h3><p>You haven't placed any orders yet.</p><a href="/" class="btn btn-primary"><i class="fas fa-store"></i> Start Shopping</a></div>`;
+      return;
+    }
+
+    container.innerHTML = res.data.map(order => `
+      <div class="cart-item" style="margin-bottom:var(--spacing-4);align-items:center;cursor:pointer" onclick="viewOrder(${order.id})">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:var(--spacing-3);margin-bottom:var(--spacing-2)">
+            <span style="font-weight:700;font-size:var(--text-sm)">#${escapeHtml(order.order_number)}</span>
+            <span class="status-badge status-${order.status}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
+          </div>
+          <p style="font-size:var(--text-xs);color:var(--text-muted)">${Format.datetime(order.created_at)} • ${order.item_count} item${order.item_count !== 1 ? 's' : ''}</p>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <p style="font-weight:800;font-size:var(--text-lg);color:var(--text-primary)">${Format.price(order.total)}</p>
+          <p style="font-size:var(--text-xs);color:var(--color-primary);font-weight:600;margin-top:4px">View Details <i class="fas fa-chevron-right"></i></p>
+        </div>
+      </div>`).join('');
+
+    Pagination.render(document.getElementById('ordersPagination'), res.pagination, (p) => { currentPage = p; loadOrders(); });
+  } catch (err) {
+    container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle fa-3x" style="color:var(--color-danger)"></i><h3>Failed to load orders</h3><p>${err.message || ''}</p></div>`;
+  }
+}
+
+async function viewOrder(orderId) {
+  const overlay = document.getElementById('orderDetailOverlay');
+  const body    = document.getElementById('orderDetailBody');
+  const title   = document.getElementById('orderDetailTitle');
+  overlay.classList.add('open');
+  body.innerHTML = `<div style="text-align:center;padding:var(--spacing-8)"><div class="spinner spinner-lg"></div></div>`;
+
+  try {
+    const res   = await Api.orders.get(orderId);
+    const order = res.data;
+    title.textContent = `Order #${order.order_number}`;
+    body.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--spacing-6)">
+        <span class="status-badge status-${order.status}" style="font-size:var(--text-sm);padding:6px 16px">${order.status.toUpperCase()}</span>
+        <span style="font-size:var(--text-sm);color:var(--text-muted)">${Format.datetime(order.created_at)}</span>
+      </div>
+
+      <h4 style="margin-bottom:var(--spacing-4);font-size:var(--text-sm);color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em">Items</h4>
+      ${order.items.map(item => `
+        <div style="display:flex;gap:var(--spacing-4);align-items:center;padding:var(--spacing-3) 0;border-bottom:1px solid var(--border-light)">
+          <div style="width:50px;height:50px;border-radius:var(--radius-sm);overflow:hidden;background:var(--bg-tertiary);flex-shrink:0">
+            ${item.product_image ? `<img src="${item.product_image}" style="width:100%;height:100%;object-fit:cover">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center"><i class="fas fa-image" style="color:var(--text-muted);font-size:.7rem"></i></div>'}
+          </div>
+          <div style="flex:1">
+            <p style="font-weight:600;font-size:var(--text-sm)">${escapeHtml(item.product_name)}</p>
+            <p style="color:var(--text-muted);font-size:var(--text-xs)">${Format.price(item.unit_price)} × ${item.quantity}</p>
+          </div>
+          <span style="font-weight:700">${Format.price(item.subtotal)}</span>
+        </div>`).join('')}
+
+      <div style="margin-top:var(--spacing-6);display:grid;grid-template-columns:1fr 1fr;gap:var(--spacing-6)">
+        <div>
+          <h4 style="font-size:var(--text-sm);color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--spacing-3)">Shipping Address</h4>
+          <p style="font-size:var(--text-sm);color:var(--text-secondary);line-height:1.8">
+            ${escapeHtml(order.shipping_firstname)} ${escapeHtml(order.shipping_lastname)}<br>
+            ${escapeHtml(order.shipping_address)}<br>
+            ${escapeHtml(order.shipping_city)}, ${escapeHtml(order.shipping_postal)}<br>
+            ${escapeHtml(order.shipping_country)}
+          </p>
+        </div>
+        <div>
+          <h4 style="font-size:var(--text-sm);color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--spacing-3)">Order Summary</h4>
+          <div style="font-size:var(--text-sm)">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text-secondary)">Subtotal</span><span>${Format.price(order.subtotal)}</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text-secondary)">Shipping</span><span>${parseFloat(order.shipping_cost) === 0 ? 'FREE' : Format.price(order.shipping_cost)}</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text-secondary)">Tax</span><span>${Format.price(order.tax)}</span></div>
+            <div style="display:flex;justify-content:space-between;font-weight:800;font-size:var(--text-base);border-top:1px solid var(--border-color);padding-top:8px"><span>Total</span><span style="color:var(--color-primary)">${Format.price(order.total)}</span></div>
+          </div>
+        </div>
+      </div>`;
+  } catch {
+    body.innerHTML = `<p style="color:var(--color-danger);text-align:center">Could not load order details.</p>`;
+  }
+}
+</script>
+</body>
+</html>

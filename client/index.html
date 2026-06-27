@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShopLux — Premium E-Commerce</title>
+  <meta name="description" content="ShopLux — Discover curated products across Electronics, Fashion, Home, Books and Sports." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/assets/css/variables.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" />
+  <link rel="stylesheet" href="/assets/css/layout.css" />
+  <link rel="stylesheet" href="/assets/css/pages.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>" />
+</head>
+<body>
+
+  <!-- ── LOADER ── -->
+  <div id="loader" class="loader-overlay">
+    <div class="loader-content">
+      <div class="loader-logo">ShopLux</div>
+      <div class="loader-spinner"></div>
+    </div>
+  </div>
+
+  <!-- ── TOAST NOTIFICATIONS ── -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- ── NAVBAR ── -->
+  <header class="navbar" id="navbar">
+    <div class="container navbar-inner">
+      <!-- Logo -->
+      <a href="/" class="navbar-logo" data-link="/">
+        
+        <span class="logo-text">Shop<span class="logo-accent">Lux</span></span>
+      </a>
+
+      <!-- Search Bar -->
+      <div class="navbar-search">
+        <form id="searchForm" class="search-form">
+          <input type="text" id="searchInput" placeholder="Search products, categories…" autocomplete="off" />
+          <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+        </form>
+        <div id="searchDropdown" class="search-dropdown hidden"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="navbar-actions">
+        <button class="action-btn theme-toggle" id="themeToggle" title="Toggle Dark Mode">
+          <i class="fas fa-moon"></i>
+        </button>
+
+        <a href="/pages/wishlist.html" class="action-btn" data-link="/pages/wishlist.html" title="Wishlist">
+          <i class="fas fa-heart"></i>
+          <span class="badge" id="wishlistBadge" style="display:none">0</span>
+        </a>
+
+        <a href="/pages/cart.html" class="action-btn" data-link="/pages/cart.html" title="Cart">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="badge" id="cartBadge" style="display:none">0</span>
+        </a>
+
+        <!-- Auth Menu -->
+        <div class="auth-menu" id="authMenu">
+          <button class="action-btn avatar-btn" id="avatarBtn">
+            <i class="fas fa-user-circle"></i>
+          </button>
+          <div class="dropdown-menu" id="userDropdown">
+            <div class="dropdown-header" id="dropdownHeader">
+              <p class="dropdown-name">Welcome!</p>
+              <p class="dropdown-email">Sign in to continue</p>
+            </div>
+            <div id="guestLinks">
+              <a href="/pages/login.html" class="dropdown-item" data-link="/pages/login.html">
+                <i class="fas fa-sign-in-alt"></i> Login
+              </a>
+              <a href="/pages/register.html" class="dropdown-item" data-link="/pages/register.html">
+                <i class="fas fa-user-plus"></i> Register
+              </a>
+            </div>
+            <div id="userLinks" class="hidden">
+              <a href="/pages/dashboard.html" class="dropdown-item" data-link="/pages/dashboard.html">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+              </a>
+              <a href="/pages/orders.html" class="dropdown-item" data-link="/pages/orders.html">
+                <i class="fas fa-box"></i> My Orders
+              </a>
+              <a href="/pages/wishlist.html" class="dropdown-item" data-link="/pages/wishlist.html">
+                <i class="fas fa-heart"></i> Wishlist
+              </a>
+              <div id="adminLink" class="hidden">
+                <hr class="dropdown-divider"/>
+                <a href="/pages/admin.html" class="dropdown-item dropdown-item--admin" data-link="/pages/admin.html">
+                  <i class="fas fa-shield-alt"></i> Admin Panel
+                </a>
+              </div>
+              <hr class="dropdown-divider"/>
+              <button class="dropdown-item dropdown-item--danger" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hamburger -->
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Category nav -->
+    <nav class="category-nav" id="categoryNav">
+      <div class="container category-nav-inner">
+        <a href="/?category=electronics" class="cat-link" data-cat="electronics">
+          <i class="fas fa-microchip"></i> Electronics
+        </a>
+        <a href="/?category=fashion" class="cat-link" data-cat="fashion">
+          <i class="fas fa-tshirt"></i> Fashion
+        </a>
+        <a href="/?category=home" class="cat-link" data-cat="home">
+          <i class="fas fa-home"></i> Home & Living
+        </a>
+        <a href="/?category=books" class="cat-link" data-cat="books">
+          <i class="fas fa-book"></i> Books
+        </a>
+        <a href="/?category=sports" class="cat-link" data-cat="sports">
+          <i class="fas fa-dumbbell"></i> Sports
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ── MOBILE SIDEBAR ── -->
+  <aside class="mobile-sidebar" id="mobileSidebar">
+    <div class="sidebar-header">
+      <span class="logo-text">Shop<span class="logo-accent">Lux</span></span>
+      <button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/" class="sidebar-link" data-link="/"><i class="fas fa-home"></i> Home</a>
+      <a href="/?category=electronics" class="sidebar-link"><i class="fas fa-microchip"></i> Electronics</a>
+      <a href="/?category=fashion" class="sidebar-link"><i class="fas fa-tshirt"></i> Fashion</a>
+      <a href="/?category=home" class="sidebar-link"><i class="fas fa-home"></i> Home & Living</a>
+      <a href="/?category=books" class="sidebar-link"><i class="fas fa-book"></i> Books</a>
+      <a href="/?category=sports" class="sidebar-link"><i class="fas fa-dumbbell"></i> Sports</a>
+      <hr/>
+      <a href="/pages/cart.html" class="sidebar-link" data-link="/pages/cart.html"><i class="fas fa-shopping-bag"></i> Cart</a>
+      <a href="/pages/wishlist.html" class="sidebar-link" data-link="/pages/wishlist.html"><i class="fas fa-heart"></i> Wishlist</a>
+      <a href="/pages/dashboard.html" class="sidebar-link" data-link="/pages/dashboard.html"><i class="fas fa-user"></i> Account</a>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main id="app">
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="heroSection">
+      <div class="hero-slides">
+        <div class="hero-slide active" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e)">
+          <div class="hero-content">
+            <span class="hero-eyebrow">New Season 2026</span>
+            <h1 class="hero-title">Elevate Your <br><span class="hero-gradient">Everyday Style</span></h1>
+            <p class="hero-subtitle">Curated collections from the world's finest brands — delivered to your door.</p>
+            <div class="hero-cta">
+              <a href="/?category=fashion" class="btn btn-primary btn-lg">Shop Fashion</a>
+              <a href="/" class="btn btn-outline-white btn-lg">Explore All</a>
+            </div>
+          </div>
+          <div class="hero-visual">
+            <div class="hero-badge">
+              <span class="badge-number">500+</span>
+              <span class="badge-label">Premium Brands</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-slide" style="background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460)">
+          <div class="hero-content">
+            <span class="hero-eyebrow">Tech Collection</span>
+            <h1 class="hero-title">The Future of <br><span class="hero-gradient">Technology</span></h1>
+            <p class="hero-subtitle">The latest devices, wearables, and accessories — tested and curated for you.</p>
+            <div class="hero-cta">
+              <a href="/?category=electronics" class="btn btn-primary btn-lg">Shop Tech</a>
+              <a href="/" class="btn btn-outline-white btn-lg">View Deals</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-dots" id="heroDots">
+        <button class="hero-dot active"></button>
+        <button class="hero-dot"></button>
+      </div>
+      <button class="hero-arrow hero-prev" id="heroPrev"><i class="fas fa-chevron-left"></i></button>
+      <button class="hero-arrow hero-next" id="heroNext"><i class="fas fa-chevron-right"></i></button>
+    </section>
+
+    <!-- STATS BAR -->
+    <section class="stats-bar">
+      <div class="container stats-grid">
+        <div class="stat-item">
+          <i class="fas fa-shipping-fast"></i>
+          <div><strong>Free Shipping</strong><span>On orders over $100</span></div>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-shield-alt"></i>
+          <div><strong>Secure Payment</strong><span>256-bit SSL encryption</span></div>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-undo-alt"></i>
+          <div><strong>30-Day Returns</strong><span>Hassle-free refunds</span></div>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-headset"></i>
+          <div><strong>24/7 Support</strong><span>Always here to help</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CATEGORIES SECTION -->
+    <section class="section" id="categoriesSection">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Shop by Category</h2>
+          <p class="section-subtitle">Explore our curated collections</p>
+        </div>
+        <div class="categories-grid" id="categoriesGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURED PRODUCTS -->
+    <section class="section section--dark" id="featuredSection">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Featured Products</h2>
+          <a href="/?sort=popular" class="section-link">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="products-grid" id="featuredGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- BANNER PROMO -->
+    <section class="promo-banner">
+      <div class="container promo-inner">
+        <div class="promo-text">
+          <span class="promo-eyebrow">Limited Offer</span>
+          <h2 class="promo-title">Up to <span>40% Off</span> Select Items</h2>
+          <p>Don't miss out on our biggest sale of the year. Shop now while stocks last.</p>
+          <a href="/?sort=popular" class="btn btn-primary">Grab the Deal</a>
+        </div>
+        <div class="promo-visual">
+          <div class="promo-badge">SALE</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ALL PRODUCTS (with filters) -->
+    <section class="section" id="productsSection">
+      <div class="container">
+        <div class="products-header">
+          <h2 class="section-title" id="productsTitle">All Products</h2>
+          <div class="products-controls">
+            <div class="filter-group">
+              <select id="sortSelect" class="form-select">
+                <option value="newest">Newest</option>
+                <option value="popular">Most Popular</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="rating">Top Rated</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <input type="number" id="minPrice" class="form-input price-input" placeholder="Min $" min="0" />
+              <span>–</span>
+              <input type="number" id="maxPrice" class="form-input price-input" placeholder="Max $" min="0" />
+              <button id="applyPrice" class="btn btn-sm btn-outline">Apply</button>
+            </div>
+            <div class="view-toggle">
+              <button class="view-btn active" id="gridView" title="Grid View"><i class="fas fa-th"></i></button>
+              <button class="view-btn" id="listView" title="List View"><i class="fas fa-list"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="products-grid" id="productsGrid">
+          <!-- Populated by JS -->
+        </div>
+
+        <div id="productsEmpty" class="empty-state hidden">
+          <i class="fas fa-search fa-3x"></i>
+          <h3>No products found</h3>
+          <p>Try adjusting your filters or search term</p>
+          <button class="btn btn-outline" onclick="resetFilters()">Reset Filters</button>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </section>
+
+    <!-- RECENTLY VIEWED -->
+    <section class="section" id="recentSection" style="display:none">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Recently Viewed</h2>
+        </div>
+        <div class="products-scroll" id="recentGrid"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── PRODUCT QUICK VIEW MODAL ── -->
+  <div class="modal-overlay" id="quickViewOverlay">
+    <div class="modal modal-lg" id="quickViewModal">
+      <button class="modal-close" id="quickViewClose"><i class="fas fa-times"></i></button>
+      <div id="quickViewContent"></div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <h3 class="footer-logo">Shop<span class="logo-accent">Lux</span></h3>
+        <p>Premium e-commerce experience built with Node.js, Express & MySQL.</p>
+        <div class="footer-social">
+          <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-btn"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="/?category=electronics">Electronics</a></li>
+          <li><a href="/?category=fashion">Fashion</a></li>
+          <li><a href="/?category=home">Home & Living</a></li>
+          <li><a href="/?sort=popular">Best Sellers</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="/pages/login.html" data-link="/pages/login.html">Login</a></li>
+          <li><a href="/pages/register.html" data-link="/pages/register.html">Register</a></li>
+          <li><a href="/pages/orders.html" data-link="/pages/orders.html">My Orders</a></li>
+          <li><a href="/pages/wishlist.html" data-link="/pages/wishlist.html">Wishlist</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Returns</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <p>&copy; 2026 ShopLux. All rights reserved.</p>
+        <div class="payment-badges">
+          <i class="fab fa-cc-visa"></i>
+          <i class="fab fa-cc-mastercard"></i>
+          <i class="fab fa-cc-paypal"></i>
+          <i class="fab fa-cc-stripe"></i>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── BACK TO TOP ── -->
+  <button class="back-to-top" id="backToTop" title="Back to top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <!-- ── SCRIPTS ── -->
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/cart.js"></script>
+  <script src="/assets/js/ui.js"></script>
+  <script src="/assets/js/app.js"></script>
+</body>
+</html>

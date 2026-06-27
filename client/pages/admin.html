@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — ShopLux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/assets/css/variables.css" /><link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" /><link rel="stylesheet" href="/assets/css/layout.css" />
+  <link rel="stylesheet" href="/assets/css/pages.css" /><link rel="stylesheet" href="/assets/css/animations.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
+</head>
+<body>
+<div id="toastContainer" class="toast-container"></div>
+<header class="navbar"><div class="container navbar-inner">
+  <a href="/" class="navbar-logo"><span class="logo-text">Shop<span class="logo-accent">Lux</span> Admin</span></a>
+  <nav style="display:flex;align-items:center;gap:var(--spacing-4);margin-left:auto">
+    <a href="/" class="btn btn-sm btn-outline"><i class="fas fa-store"></i> Store</a>
+    <button class="action-btn theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+    <button class="btn btn-sm btn-danger" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </nav>
+</div></header>
+
+<main>
+  <div class="container" style="padding:var(--spacing-8) var(--spacing-6)">
+    <!-- Admin Tabs -->
+    <div style="display:flex;gap:var(--spacing-2);margin-bottom:var(--spacing-8);border-bottom:1px solid var(--border-color);padding-bottom:0">
+      <button class="admin-tab active" data-tab="dashboard">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </button>
+      <button class="admin-tab" data-tab="products">
+        <i class="fas fa-box"></i> Products
+      </button>
+      <button class="admin-tab" data-tab="orders">
+        <i class="fas fa-shopping-bag"></i> Orders
+      </button>
+      <button class="admin-tab" data-tab="users">
+        <i class="fas fa-users"></i> Users
+      </button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="admin-dashboard">
+      <div class="admin-stats" id="adminStats">
+        <div class="admin-stat-card"><div class="admin-stat-icon stat-purple"><i class="fas fa-dollar-sign"></i></div><div><div class="admin-stat-val" id="stat-revenue">—</div><div class="admin-stat-label">Total Revenue</div></div></div>
+        <div class="admin-stat-card"><div class="admin-stat-icon stat-green"><i class="fas fa-shopping-bag"></i></div><div><div class="admin-stat-val" id="stat-orders">—</div><div class="admin-stat-label">Total Orders</div></div></div>
+        <div class="admin-stat-card"><div class="admin-stat-icon stat-orange"><i class="fas fa-users"></i></div><div><div class="admin-stat-val" id="stat-users">—</div><div class="admin-stat-label">Registered Users</div></div></div>
+        <div class="admin-stat-card"><div class="admin-stat-icon stat-red"><i class="fas fa-box"></i></div><div><div class="admin-stat-val" id="stat-products">—</div><div class="admin-stat-label">Active Products</div></div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--spacing-6)">
+        <div style="background:var(--bg-card);border-radius:var(--radius-xl);padding:var(--spacing-6);border:1px solid var(--border-color)">
+          <h3 style="font-size:var(--text-lg);margin-bottom:var(--spacing-5)">Top Products</h3>
+          <div id="topProductsTable"></div>
+        </div>
+        <div style="background:var(--bg-card);border-radius:var(--radius-xl);padding:var(--spacing-6);border:1px solid var(--border-color)">
+          <h3 style="font-size:var(--text-lg);margin-bottom:var(--spacing-5)">Recent Orders</h3>
+          <div id="recentOrdersTable"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div id="admin-products" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--spacing-6)">
+        <h2 style="font-size:var(--text-2xl);font-weight:700">Products</h2>
+        <button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Add Product</button>
+      </div>
+      <div class="data-table-wrap"><table class="data-table">
+        <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Sales</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="productsTable"><tr><td colspan="7" style="text-align:center;padding:var(--spacing-8)"><div class="spinner"></div></td></tr></tbody>
+      </table></div>
+    </div>
+
+    <!-- ORDERS -->
+    <div id="admin-orders" style="display:none">
+      <h2 style="font-size:var(--text-2xl);font-weight:700;margin-bottom:var(--spacing-6)">All Orders</h2>
+      <div class="data-table-wrap"><table class="data-table">
+        <thead><tr><th>Order #</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="ordersTable"><tr><td colspan="6" style="text-align:center;padding:var(--spacing-8)"><div class="spinner"></div></td></tr></tbody>
+      </table></div>
+      <div id="adminOrdersPag" class="pagination"></div>
+    </div>
+
+    <!-- USERS -->
+    <div id="admin-users" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--spacing-6)">
+        <h2 style="font-size:var(--text-2xl);font-weight:700">Users</h2>
+        <input type="text" id="userSearch" class="form-input" placeholder="Search users…" style="width:240px" />
+      </div>
+      <div class="data-table-wrap"><table class="data-table">
+        <thead><tr><th>User</th><th>Email</th><th>Orders</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="usersTable"><tr><td colspan="6" style="text-align:center;padding:var(--spacing-8)"><div class="spinner"></div></td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</main>
+
+<!-- Product Modal -->
+<div class="modal-overlay" id="productModalOverlay">
+  <div class="modal modal-lg"><button class="modal-close" onclick="document.getElementById('productModalOverlay').classList.remove('open')"><i class="fas fa-times"></i></button>
+    <div class="modal-header"><h3 class="modal-title" id="productModalTitle">Add Product</h3></div>
+    <div class="modal-body">
+      <form id="productForm" enctype="multipart/form-data">
+        <input type="hidden" id="prod_id" />
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Name <span class="required">*</span></label>
+            <input type="text" id="prod_name" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category <span class="required">*</span></label>
+            <select id="prod_category" class="form-select" required>
+              <option value="">Select…</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="prod_desc" class="form-textarea" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Price ($) <span class="required">*</span></label>
+            <input type="number" id="prod_price" class="form-input" step="0.01" min="0" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sale Price ($)</label>
+            <input type="number" id="prod_sale_price" class="form-input" step="0.01" min="0" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Stock <span class="required">*</span></label>
+            <input type="number" id="prod_stock" class="form-input" min="0" value="0" required />
+          </div>
+          <div class="form-group" style="justify-content:flex-end;padding-top:1.8rem">
+            <label style="display:flex;align-items:center;gap:var(--spacing-2);cursor:pointer;font-size:var(--text-sm)">
+              <input type="checkbox" id="prod_featured" style="accent-color:var(--color-primary)" />
+              Featured Product
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Product Image</label>
+          <input type="file" id="prod_image" class="form-input" accept="image/*" />
+        </div>
+        <button type="submit" class="btn btn-primary" id="productSaveBtn">
+          <i class="fas fa-save"></i> Save Product
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+.admin-tab {
+  padding: var(--spacing-3) var(--spacing-5);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  transition: all var(--transition-fast);
+  display: flex; align-items: center; gap: var(--spacing-2);
+}
+.admin-tab:hover  { color: var(--color-primary); }
+.admin-tab.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+</style>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/cart.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script>
+let categories = [];
+let ordersPage = 1;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const theme = localStorage.getItem('sl_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeToggle')?.addEventListener('click', () => {
+    const c = document.documentElement.getAttribute('data-theme');
+    const n = c === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', n);
+    localStorage.setItem('sl_theme', n);
+    document.querySelector('#themeToggle i').className = n === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+  });
+  Auth.init();
+  if (!Auth.isLoggedIn || !Auth.isAdmin) { Toast.show('Access denied.','error'); setTimeout(()=>window.location.href='/',1000); return; }
+
+  // Tabs
+  document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', async () => {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const id = tab.dataset.tab;
+      ['dashboard','products','orders','users'].forEach(t => document.getElementById(`admin-${t}`).style.display = t === id ? 'block' : 'none');
+      if (id === 'dashboard') await loadDashboard();
+      if (id === 'products')  await loadAdminProducts();
+      if (id === 'orders')    await loadAdminOrders();
+      if (id === 'users')     await loadAdminUsers();
+    });
+  });
+
+  // User search
+  let searchTimer;
+  document.getElementById('userSearch')?.addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => loadAdminUsers(e.target.value), 400);
+  });
+
+  await loadCategories();
+  await loadDashboard();
+});
+
+async function loadCategories() {
+  try {
+    const res = await Api.categories.list();
+    categories = res.data;
+    const sel = document.getElementById('prod_category');
+    if (sel) sel.innerHTML = `<option value="">Select…</option>` + res.data.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+  } catch {}
+}
+
+async function loadDashboard() {
+  try {
+    const res = await Api.admin.dashboard();
+    const d = res.data;
+    document.getElementById('stat-revenue').textContent  = Format.price(d.revenue.total_revenue);
+    document.getElementById('stat-orders').textContent   = Format.number(d.orders.total);
+    document.getElementById('stat-users').textContent    = Format.number(d.users.total);
+    document.getElementById('stat-products').textContent = Format.number(d.products.total);
+
+    document.getElementById('topProductsTable').innerHTML = d.topProducts.map(p => `
+      <div style="display:flex;align-items:center;gap:var(--spacing-3);padding:var(--spacing-3) 0;border-bottom:1px solid var(--border-light)">
+        <div style="width:38px;height:38px;border-radius:var(--radius-sm);overflow:hidden;background:var(--bg-tertiary);flex-shrink:0">
+          ${p.image ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%"><i class="fas fa-image" style="color:var(--text-muted);font-size:.6rem"></i></div>'}
+        </div>
+        <div style="flex:1;min-width:0">
+          <p style="font-size:var(--text-sm);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(p.name)}</p>
+          <p style="font-size:var(--text-xs);color:var(--text-muted)">${p.sold_count} sold</p>
+        </div>
+        <span style="font-weight:700;font-size:var(--text-sm);flex-shrink:0">${Format.price(p.price)}</span>
+      </div>`).join('');
+
+    document.getElementById('recentOrdersTable').innerHTML = d.recentOrders.map(o => `
+      <div style="display:flex;align-items:center;gap:var(--spacing-3);padding:var(--spacing-3) 0;border-bottom:1px solid var(--border-light)">
+        <div style="flex:1;min-width:0">
+          <p style="font-size:var(--text-sm);font-weight:600">#${escapeHtml(o.order_number)}</p>
+          <p style="font-size:var(--text-xs);color:var(--text-muted)">${escapeHtml(o.firstname)} ${escapeHtml(o.lastname)}</p>
+        </div>
+        <span class="status-badge status-${o.status}" style="flex-shrink:0">${o.status}</span>
+        <span style="font-weight:700;font-size:var(--text-sm);flex-shrink:0">${Format.price(o.total)}</span>
+      </div>`).join('');
+  } catch (err) { Toast.show('Dashboard failed.', 'error'); }
+}
+
+async function loadAdminProducts() {
+  const tbody = document.getElementById('productsTable');
+  try {
+    const res = await Api.products.list({ limit: 50 });
+    tbody.innerHTML = res.data.map(p => `
+      <tr>
+        <td style="display:flex;align-items:center;gap:var(--spacing-3)">
+          <div style="width:42px;height:42px;border-radius:var(--radius-sm);overflow:hidden;background:var(--bg-tertiary);flex-shrink:0">
+            ${p.image ? `<img src="${p.image}" class="table-product-img">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center"><i class="fas fa-image" style="color:var(--text-muted);font-size:.6rem"></i></div>'}
+          </div>
+          <span style="font-weight:600;font-size:var(--text-sm)">${escapeHtml(p.name)}</span>
+        </td>
+        <td>${escapeHtml(p.category_name || '')}</td>
+        <td>${Format.price(p.sale_price || p.price)}</td>
+        <td>${p.stock === 0 ? `<span class="stock-out">Out</span>` : p.stock <= 5 ? `<span class="stock-low">${p.stock}</span>` : p.stock}</td>
+        <td>${p.sold_count}</td>
+        <td><span class="status-badge ${p.is_active ? 'status-paid' : 'status-cancelled'}">${p.is_active ? 'Active' : 'Hidden'}</span></td>
+        <td>
+          <div class="table-actions">
+            <button class="btn btn-sm btn-outline" onclick="editProduct(${p.id})" title="Edit"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-sm btn-danger"  onclick="deleteProduct(${p.id})" title="Delete"><i class="fas fa-trash"></i></button>
+          </div>
+        </td>
+      </tr>`).join('');
+  } catch { tbody.innerHTML = '<tr><td colspan="7" style="color:var(--color-danger);text-align:center">Failed to load.</td></tr>'; }
+}
+
+async function loadAdminOrders(page = 1) {
+  ordersPage = page;
+  const tbody = document.getElementById('ordersTable');
+  try {
+    const res = await Api.orders.list({ page, limit: 15 });
+    tbody.innerHTML = res.data.map(o => `
+      <tr>
+        <td style="font-weight:600">#${escapeHtml(o.order_number)}</td>
+        <td>${escapeHtml(o.firstname)} ${escapeHtml(o.lastname)}<br><span style="font-size:var(--text-xs);color:var(--text-muted)">${escapeHtml(o.email)}</span></td>
+        <td style="font-weight:700">${Format.price(o.total)}</td>
+        <td>
+          <select class="form-select" style="font-size:var(--text-xs);padding:4px 8px;width:auto" onchange="updateOrderStatus(${o.id}, this.value)">
+            ${['pending','paid','shipped','delivered','cancelled'].map(s =>
+              `<option value="${s}" ${o.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
+          </select>
+        </td>
+        <td style="font-size:var(--text-xs);color:var(--text-muted)">${Format.date(o.created_at)}</td>
+        <td><span class="status-badge status-${o.payment_status || 'pending'}">${o.payment_status || 'pending'}</span></td>
+      </tr>`).join('');
+    Pagination.render(document.getElementById('adminOrdersPag'), res.pagination, loadAdminOrders);
+  } catch { tbody.innerHTML = '<tr><td colspan="6" style="color:var(--color-danger);text-align:center">Failed to load.</td></tr>'; }
+}
+
+async function loadAdminUsers(search = '') {
+  const tbody = document.getElementById('usersTable');
+  try {
+    const params = { limit: 30 };
+    if (search) params.search = search;
+    const res = await Api.admin.users(params);
+    tbody.innerHTML = res.data.map(u => `
+      <tr>
+        <td style="display:flex;align-items:center;gap:var(--spacing-3)">
+          <div style="width:36px;height:36px;border-radius:50%;overflow:hidden;background:var(--bg-tertiary);flex-shrink:0;display:flex;align-items:center;justify-content:center">
+            ${u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover">` : `<i class="fas fa-user" style="color:var(--text-muted);font-size:.7rem"></i>`}
+          </div>
+          <div>
+            <p style="font-weight:600;font-size:var(--text-sm)">${escapeHtml(u.firstname)} ${escapeHtml(u.lastname)}</p>
+            <p style="font-size:var(--text-xs);color:var(--text-muted)">@${escapeHtml(u.username)}</p>
+          </div>
+        </td>
+        <td style="font-size:var(--text-sm)">${escapeHtml(u.email)}</td>
+        <td>${u.order_count}</td>
+        <td style="font-size:var(--text-xs);color:var(--text-muted)">${Format.date(u.created_at)}</td>
+        <td><span class="status-badge ${u.is_active ? 'status-paid' : 'status-cancelled'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
+        <td>
+          <button class="btn btn-sm ${u.is_active ? 'btn-danger' : 'btn-success'}" onclick="toggleUser(${u.id}, this)">
+            ${u.is_active ? '<i class="fas fa-ban"></i> Deactivate' : '<i class="fas fa-check"></i> Activate'}
+          </button>
+        </td>
+      </tr>`).join('');
+  } catch { tbody.innerHTML = '<tr><td colspan="6" style="color:var(--color-danger);text-align:center">Failed to load.</td></tr>'; }
+}
+
+async function updateOrderStatus(orderId, status) {
+  try {
+    await Api.orders.updateStatus(orderId, status);
+    Toast.show('Order status updated.', 'success');
+  } catch (err) { Toast.show(err.message || 'Failed.', 'error'); }
+}
+
+async function toggleUser(userId, btn) {
+  btn.disabled = true;
+  try {
+    const res = await Api.admin.toggleUser(userId);
+    Toast.show(res.message, 'success');
+    await loadAdminUsers();
+  } catch (err) {
+    Toast.show(err.message || 'Failed.', 'error');
+    btn.disabled = false;
+  }
+}
+
+function openProductModal(productData = null) {
+  document.getElementById('productModalTitle').textContent = productData ? 'Edit Product' : 'Add Product';
+  document.getElementById('prod_id').value          = productData?.id || '';
+  document.getElementById('prod_name').value        = productData?.name || '';
+  document.getElementById('prod_desc').value        = productData?.description || '';
+  document.getElementById('prod_price').value       = productData?.price || '';
+  document.getElementById('prod_sale_price').value  = productData?.sale_price || '';
+  document.getElementById('prod_stock').value       = productData?.stock ?? 0;
+  document.getElementById('prod_featured').checked  = productData?.is_featured || false;
+  if (productData?.category_id) document.getElementById('prod_category').value = productData.category_id;
+  document.getElementById('productModalOverlay').classList.add('open');
+}
+window.openProductModal = openProductModal;
+
+async function editProduct(id) {
+  try {
+    const res = await Api.products.get(id);
+    openProductModal(res.data);
+  } catch { Toast.show('Could not load product.', 'error'); }
+}
+window.editProduct = editProduct;
+
+async function deleteProduct(id) {
+  if (!confirm('Remove this product?')) return;
+  try {
+    await Api.products.delete(id);
+    Toast.show('Product removed.', 'success');
+    await loadAdminProducts();
+  } catch (err) { Toast.show(err.message || 'Failed.', 'error'); }
+}
+window.deleteProduct = deleteProduct;
+window.toggleUser = toggleUser;
+window.updateOrderStatus = updateOrderStatus;
+
+document.getElementById('productForm')?.addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('productSaveBtn');
+  const id  = document.getElementById('prod_id').value;
+  const form = new FormData();
+  form.append('category_id', document.getElementById('prod_category').value);
+  form.append('name',        document.getElementById('prod_name').value.trim());
+  form.append('description', document.getElementById('prod_desc').value.trim());
+  form.append('price',       document.getElementById('prod_price').value);
+  form.append('stock',       document.getElementById('prod_stock').value);
+  form.append('is_featured', document.getElementById('prod_featured').checked ? '1' : '0');
+  const sale = document.getElementById('prod_sale_price').value;
+  if (sale) form.append('sale_price', sale);
+  const file = document.getElementById('prod_image').files[0];
+  if (file) form.append('image', file);
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Saving…';
+  try {
+    if (id) await Api.products.update(id, form);
+    else    await Api.products.create(form);
+    Toast.show(`Product ${id ? 'updated' : 'created'}!`, 'success');
+    document.getElementById('productModalOverlay').classList.remove('open');
+    document.getElementById('productForm').reset();
+    await loadAdminProducts();
+  } catch (err) {
+    Toast.show(err.message || 'Failed.', 'error');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-save"></i> Save Product';
+});
+</script>
+</body>
+</html>

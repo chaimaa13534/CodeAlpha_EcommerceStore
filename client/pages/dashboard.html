@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — ShopLux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/assets/css/variables.css" /><link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/components.css" /><link rel="stylesheet" href="/assets/css/layout.css" />
+  <link rel="stylesheet" href="/assets/css/pages.css" /><link rel="stylesheet" href="/assets/css/animations.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
+</head>
+<body>
+<div id="toastContainer" class="toast-container"></div>
+<header class="navbar"><div class="container navbar-inner">
+  <a href="/" class="navbar-logo"><span class="logo-text">Shop<span class="logo-accent">Lux</span></span></a>
+  <nav style="display:flex;align-items:center;gap:var(--spacing-4);margin-left:auto">
+    <a href="/" class="btn btn-sm btn-outline"><i class="fas fa-store"></i> Store</a>
+    <button class="action-btn theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+  </nav>
+</div></header>
+
+<main>
+  <div class="container dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+      <div class="dash-avatar-wrap">
+        <img class="dash-avatar" id="dashAvatar" src="" alt="Avatar" onerror="this.src=''" />
+        <p class="dash-name"  id="dashName">Loading…</p>
+        <p class="dash-email" id="dashEmail"></p>
+      </div>
+      <nav class="dash-nav">
+        <div class="dash-nav-item active" data-tab="profile"><i class="fas fa-user"></i> Profile</div>
+        <div class="dash-nav-item" data-tab="orders"><i class="fas fa-box"></i> Orders</div>
+        <div class="dash-nav-item" data-tab="wishlist"><i class="fas fa-heart"></i> Wishlist</div>
+        <div class="dash-nav-item" data-tab="password"><i class="fas fa-key"></i> Password</div>
+        <hr style="border:none;border-top:1px solid var(--border-color);margin:var(--spacing-2) 0"/>
+        <div class="dash-nav-item" style="color:var(--color-danger)" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <div class="dash-content">
+      <!-- PROFILE TAB -->
+      <div id="tab-profile">
+        <h2 class="dash-content-title">My Profile</h2>
+        <form id="profileForm" enctype="multipart/form-data">
+          <div style="display:flex;align-items:center;gap:var(--spacing-6);margin-bottom:var(--spacing-8)">
+            <div style="position:relative">
+              <img id="avatarPreview" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--color-primary);background:var(--bg-tertiary)" onerror="this.src=''" />
+              <label for="avatarInput" style="position:absolute;bottom:0;right:0;width:28px;height:28px;border-radius:50%;background:var(--color-primary);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.7rem">
+                <i class="fas fa-camera"></i>
+              </label>
+              <input type="file" id="avatarInput" accept="image/*" style="display:none" />
+            </div>
+            <div>
+              <p style="font-size:var(--text-sm);color:var(--text-secondary)">Upload a profile photo</p>
+              <p style="font-size:var(--text-xs);color:var(--text-muted)">JPG, PNG or GIF. Max 5MB.</p>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First Name</label>
+              <input type="text" id="pf_firstname" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name</label>
+              <input type="text" id="pf_lastname" class="form-input" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <div class="input-icon-wrap"><i class="fas fa-at"></i>
+              <input type="text" id="pf_username" class="form-input" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="pf_email" disabled style="opacity:.6;cursor:not-allowed" />
+          </div>
+          <button type="submit" class="btn btn-primary" id="profileSaveBtn">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+        </form>
+      </div>
+
+      <!-- ORDERS TAB -->
+      <div id="tab-orders" style="display:none">
+        <h2 class="dash-content-title">My Orders</h2>
+        <div id="dashOrders"><div style="text-align:center;padding:var(--spacing-8)"><div class="spinner spinner-lg"></div></div></div>
+      </div>
+
+      <!-- WISHLIST TAB -->
+      <div id="tab-wishlist" style="display:none">
+        <h2 class="dash-content-title">My Wishlist</h2>
+        <div class="wishlist-grid" id="dashWishlist">
+          <div style="text-align:center;padding:var(--spacing-8);grid-column:1/-1"><div class="spinner spinner-lg"></div></div>
+        </div>
+      </div>
+
+      <!-- PASSWORD TAB -->
+      <div id="tab-password" style="display:none">
+        <h2 class="dash-content-title">Change Password</h2>
+        <form id="passwordForm" style="max-width:400px">
+          <div class="form-group">
+            <label class="form-label">Current Password <span class="required">*</span></label>
+            <input type="password" id="pwd_current" class="form-input" placeholder="Your current password" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">New Password <span class="required">*</span></label>
+            <input type="password" id="pwd_new" class="form-input" placeholder="At least 6 characters" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm New Password <span class="required">*</span></label>
+            <input type="password" id="pwd_confirm" class="form-input" placeholder="Repeat new password" />
+          </div>
+          <button type="submit" class="btn btn-primary" id="pwdSaveBtn">
+            <i class="fas fa-key"></i> Update Password
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/cart.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const theme = localStorage.getItem('sl_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeToggle')?.addEventListener('click', () => {
+    const c = document.documentElement.getAttribute('data-theme');
+    const n = c === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', n);
+    localStorage.setItem('sl_theme', n);
+    document.querySelector('#themeToggle i').className = n === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+  });
+
+  Auth.init();
+  if (!Auth.requireAuth('/pages/dashboard.html')) return;
+
+  await loadProfile();
+  bindTabs();
+  bindProfileForm();
+  bindPasswordForm();
+  bindAvatarPreview();
+});
+
+async function loadProfile() {
+  try {
+    const res  = await Api.auth.profile();
+    const user = res.user;
+    document.getElementById('dashName').textContent  = `${user.firstname} ${user.lastname}`;
+    document.getElementById('dashEmail').textContent = user.email;
+    const avatar = document.getElementById('dashAvatar');
+    const preview = document.getElementById('avatarPreview');
+    const avatarSrc = user.avatar || '';
+    avatar.src  = avatarSrc;
+    preview.src = avatarSrc;
+    document.getElementById('pf_firstname').value = user.firstname;
+    document.getElementById('pf_lastname').value  = user.lastname;
+    document.getElementById('pf_username').value  = user.username;
+    document.getElementById('pf_email').value     = user.email;
+  } catch {}
+}
+
+function bindTabs() {
+  document.querySelectorAll('.dash-nav-item[data-tab]').forEach(item => {
+    item.addEventListener('click', async () => {
+      document.querySelectorAll('.dash-nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      const tab = item.dataset.tab;
+      document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+      document.getElementById(`tab-${tab}`).style.display = 'block';
+      if (tab === 'orders')   await loadDashOrders();
+      if (tab === 'wishlist') await loadDashWishlist();
+    });
+  });
+}
+
+async function loadDashOrders() {
+  const container = document.getElementById('dashOrders');
+  try {
+    const res = await Api.orders.list({ limit: 20 });
+    if (!res.data.length) {
+      container.innerHTML = `<div class="empty-state"><i class="fas fa-box-open fa-3x"></i><h3>No orders yet</h3><a href="/" class="btn btn-primary">Start Shopping</a></div>`;
+      return;
+    }
+    container.innerHTML = res.data.map(o => `
+      <a href="/pages/orders.html" style="display:flex;align-items:center;gap:var(--spacing-4);padding:var(--spacing-4);background:var(--bg-secondary);border-radius:var(--radius-lg);margin-bottom:var(--spacing-3);border:1px solid var(--border-color);text-decoration:none">
+        <div style="flex:1">
+          <p style="font-weight:700;font-size:var(--text-sm);color:var(--text-primary)">#${escapeHtml(o.order_number)}</p>
+          <p style="font-size:var(--text-xs);color:var(--text-muted)">${Format.date(o.created_at)} • ${o.item_count} item${o.item_count !== 1 ? 's' : ''}</p>
+        </div>
+        <span class="status-badge status-${o.status}">${o.status}</span>
+        <span style="font-weight:800;color:var(--text-primary)">${Format.price(o.total)}</span>
+      </a>`).join('');
+  } catch { container.innerHTML = '<p style="color:var(--color-danger)">Failed to load orders.</p>'; }
+}
+
+async function loadDashWishlist() {
+  const grid = document.getElementById('dashWishlist');
+  try {
+    const res = await Api.wishlist.get();
+    if (!res.data.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><i class="fas fa-heart-broken fa-3x"></i><h3>Wishlist is empty</h3><a href="/" class="btn btn-primary">Discover Products</a></div>`;
+      return;
+    }
+    grid.innerHTML = res.data.map(item => `
+      <div class="product-card">
+        <div class="product-card-img" onclick="window.location.href='/pages/product.html?id=${item.product_id}'" style="cursor:pointer">
+          ${item.image ? `<img src="${item.image}" alt="${escapeHtml(item.name)}">` : '<div class="product-card-img-placeholder"><i class="fas fa-image"></i></div>'}
+        </div>
+        <div class="product-card-body">
+          <p class="product-card-category">${escapeHtml(item.category_name || '')}</p>
+          <h3 class="product-card-name">${escapeHtml(item.name)}</h3>
+          <div class="product-card-footer">
+            <div class="product-card-price">
+              ${item.sale_price
+                ? `<span class="price-original">${Format.price(item.price)}</span><span class="price-sale price-main">${Format.price(item.sale_price)}</span>`
+                : `<span class="price-main">${Format.price(item.price)}</span>`}
+            </div>
+            <button class="btn btn-sm btn-danger" onclick="removeWish(${item.id}, this)" title="Remove">
+              <i class="fas fa-heart-broken"></i>
+            </button>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch { grid.innerHTML = '<p style="grid-column:1/-1;color:var(--color-danger)">Failed to load wishlist.</p>'; }
+}
+
+async function removeWish(wishId, btn) {
+  btn.disabled = true;
+  try {
+    await Api.wishlist.remove(wishId);
+    Toast.show('Removed from wishlist.', 'info');
+    await loadDashWishlist();
+  } catch (err) {
+    Toast.show(err.message || 'Failed.', 'error');
+    btn.disabled = false;
+  }
+}
+window.removeWish = removeWish;
+
+function bindProfileForm() {
+  document.getElementById('profileForm')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('profileSaveBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Saving…';
+    const form = new FormData();
+    form.append('firstname', document.getElementById('pf_firstname').value.trim());
+    form.append('lastname',  document.getElementById('pf_lastname').value.trim());
+    form.append('username',  document.getElementById('pf_username').value.trim());
+    const file = document.getElementById('avatarInput').files[0];
+    if (file) form.append('avatar', file);
+    try {
+      const res = await Api.auth.update(form);
+      Auth.setSession(Auth.token, res.user);
+      Toast.show('Profile updated!', 'success');
+      await loadProfile();
+    } catch (err) {
+      Toast.show(err.message || 'Failed.', 'error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+  });
+}
+
+function bindPasswordForm() {
+  document.getElementById('passwordForm')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn   = document.getElementById('pwdSaveBtn');
+    const curr  = document.getElementById('pwd_current').value;
+    const nw    = document.getElementById('pwd_new').value;
+    const conf  = document.getElementById('pwd_confirm').value;
+    if (!curr || !nw || !conf) { Toast.show('All fields required.', 'warning'); return; }
+    if (nw.length < 6) { Toast.show('New password must be at least 6 characters.', 'warning'); return; }
+    if (nw !== conf)   { Toast.show('Passwords do not match.', 'warning'); return; }
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Updating…';
+    try {
+      await Api.auth.password({ current_password: curr, new_password: nw });
+      Toast.show('Password updated!', 'success');
+      document.getElementById('passwordForm').reset();
+    } catch (err) {
+      Toast.show(err.message || 'Failed.', 'error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-key"></i> Update Password';
+  });
+}
+
+function bindAvatarPreview() {
+  document.getElementById('avatarInput')?.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('avatarPreview').src = ev.target.result;
+      document.getElementById('dashAvatar').src    = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+</script>
+</body>
+</html>
